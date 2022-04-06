@@ -8,7 +8,7 @@ final case class WritableRow(
   averageAmount: Double
 )
 
-final case class AverageTansactionAggregate(
+final case class AverageTransactionAggregate(
   customerId: String,
   totalAmount: Double,
   count: Long
@@ -18,7 +18,7 @@ final case class AverageTansactionAggregate(
 
 
 object AverageTansactionAggregate {
-  def apply(raw: RawTransaction): AverageTansactionAggregate = ???
+  def apply(raw: RawTransaction): AverageTransactionAggregate = ???
 
-  implicit val averageTransactionMonoid: Monoid[AverageTansactionAggregate] = ???
+  implicit val averageTransactionMonoid: Monoid[AverageTransactionAggregate] = ???
 }

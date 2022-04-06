@@ -36,9 +36,9 @@ def main(args: Array[String]): Unit = {
   def runJob(spark: SparkSession)(implicit conf: SparkAverageTransactionAggregateJobConfig): Unit = {
     val transactionDS: Dataset[RawTransaction] = loadTransactionData(spark)
     // val responseDS: Dataset[RawResponse] = loadCampaignResponseData(spark)
-    val averageTransactionById: Map[String,AverageTansactionAggregate] = aggregateDataWithMonoid(transactionDS)
+    val averageTransactionById: Map[String,AverageTransactionAggregate] = aggregateDataWithMonoid(transactionDS)
     // val customersInCampaign: Dataset[RawTransaction] = joinTransactionAndResponseData(responseDS, transactionDS)
-    // val averageTransactionForCampaign: Map[String,AverageTansactionAggregate] = aggregateDataWithMonoid(customersInCampaign)
+    // val averageTransactionForCampaign: Map[String,AverageTransactionAggregate] = aggregateDataWithMonoid(customersInCampaign)
     saveAverageTransactionByCustomerId(spark,averageTransactionById, conf.outputPathTransaction)
     // saveAverageTransactionByCustomerId(spark,averageTransactionForCampaign, conf.outputPathResponseTransaction)
     // saveAverageTransactionAsParquet(spark,averageTransactionById, conf.outputPathTransaction)
@@ -48,11 +48,11 @@ def main(args: Array[String]): Unit = {
 
   // def loadCampaignResponseData(spark: SparkSession)(implicit conf: SparkAverageTransactionAggregateJobConfig): Dataset[RawResponse] = ???
 
-  def aggregateDataWithMonoid(transactionDS: Dataset[RawTransaction]): Map[String,AverageTansactionAggregate] = ???
+  def aggregateDataWithMonoid(transactionDS: Dataset[RawTransaction]): Map[String,AverageTransactionAggregate] = ???
 
   // def joinTransactionAndResponseData(responseDS: Dataset[RawResponse], transactionDS: Dataset[RawTransaction]): Dataset[RawTransaction] = ???
 
-  def saveAverageTransactionByCustomerId(spark: SparkSession, transactionsById: Map[String,AverageTansactionAggregate], path: String): Unit = ???
+  def saveAverageTransactionByCustomerId(spark: SparkSession, transactionsById: Map[String,AverageTransactionAggregate], path: String): Unit = ???
 
-  // def saveAverageTransactionAsParquet(spark: SparkSession, transactionsById: Map[String,AverageTansactionAggregate], path: String): Unit = ???
+  // def saveAverageTransactionAsParquet(spark: SparkSession, transactionsById: Map[String,AverageTransactionAggregate], path: String): Unit = ???
 }
