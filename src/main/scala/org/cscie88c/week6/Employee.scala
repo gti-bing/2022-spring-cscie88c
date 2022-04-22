@@ -1,6 +1,10 @@
 package org.cscie88c.week6
 
-final case class Employee(name: String, age: Int, salary: Int)
+final case class Employee(
+    name: String,
+    age: Int,
+    salary: Int
+  )
 
 object Employee {
 
@@ -9,5 +13,5 @@ object Employee {
   def defaultSortEmployees(employees: List[Employee]): List[Employee] = ???
 
   def sortEmployeesBySalary(employees: List[Employee]): List[Employee] = ???
-  
+
 }

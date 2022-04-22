@@ -7,7 +7,11 @@ object Streams {
   val rnd = new Random()
   def uuid: String = UUID.randomUUID.toString.replaceAll("-", "")
 
-  case class Dog(name: String, age: Int, hasCurrentShots: Boolean)
+  case class Dog(
+      name: String,
+      age: Int,
+      hasCurrentShots: Boolean
+    )
 
   val mult5: LazyList[Int] = ???
 
@@ -18,6 +22,5 @@ object Streams {
   def healthyDogs(dogs: LazyList[Dog]): LazyList[Dog] = ???
 
   def averageHealthyAge(allDogs: LazyList[Dog], sampleSize: Int): Double = ???
-
 
 }

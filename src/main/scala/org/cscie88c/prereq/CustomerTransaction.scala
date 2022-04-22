@@ -1,10 +1,10 @@
 package org.cscie88c.prereq
 
 final case class CustomerTransaction(
-  customerId: String,
-  transactionDate: String,
-  transactionAmount: Double
-)
+    customerId: String,
+    transactionDate: String,
+    transactionAmount: Double
+  )
 
 object CustomerTransaction {
   def apply(csvRow: String): CustomerTransaction = {
