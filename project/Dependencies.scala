@@ -13,6 +13,7 @@ object Dependencies {
   val pureconfigVersion = "0.15.0"
   val catsVersion = "2.2.0"
   val sparkVersion = "3.2.1"
+  val AkkaVersion = "2.6.19"
 
   lazy val core = Seq(
     // cats FP libary
@@ -33,6 +34,9 @@ object Dependencies {
     // spark
     "org.apache.spark" %% "spark-sql" % sparkVersion % Provided, // for submiting spark app as a job to cluster
     // "org.apache.spark" %% "spark-sql" % sparkVersion, // for simple standalone spark app
+
+    // akka streams
+    "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
 
     // logging
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
