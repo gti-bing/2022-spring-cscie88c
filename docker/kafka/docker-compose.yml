@@ -86,6 +86,8 @@ services:
           confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.43
           /etc/confluent/docker/run & 
           sleep infinity
+    volumes:
+       - ./data:/opt/kafka-data
 
   # This "container" is a workaround to pre-create topics
   kafka-setup:
@@ -96,8 +98,8 @@ services:
       - broker1
     command: "/bin/bash -c 'echo Waiting for Kafka to be ready... && \
                             sleep 60 && \
-                            kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic TextLinesTopic && \
-                            kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic WordsWithCountsTopic && \
+                            kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic mls_source_topic_spooldir_00 && \
+                            kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic mls_sink_topic_jdbc_00 && \
                             kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic orders && \
                             kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic transactions-input-topic && \
                             kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic transactions-output-topic'"
