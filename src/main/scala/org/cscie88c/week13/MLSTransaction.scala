@@ -16,11 +16,11 @@ final case class MLSTransaction(
     city: String,
     state: String,
     zip: String,
-    beds: Int,
-    baths: Int,
-    sqft: Int,
-    age: Int,
-    lotsize: Int,
+    // beds: Int,
+    // baths: Int,
+    // sqft: Int,
+    // age: Int,
+    // lotsize: Int,
     proptype: String
 
 )
@@ -40,11 +40,11 @@ object MLSTransaction {
       city = fields(11),
       state = fields(12),
       zip = fields(13),
-      beds = fields(15).toInt,
-      baths = fields(16).toInt,
-      sqft = fields(17).toInt,
-      age = fields(18).toInt,
-      lotsize = fields(19).toInt,
+    //   beds = fields(15).toInt,
+    //   baths = fields(16).toInt,
+    //   sqft = fields(17).toInt,
+    //   age = fields(18).toInt,
+    //   lotsize = fields(19).toInt,
       proptype = fields(34)
     )
   }.toOption

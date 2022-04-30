@@ -2,27 +2,27 @@ package org.cscie88c.week13
 
 
 import cats._
-import cats.implicits._
 import java.text.SimpleDateFormat
 
 final case class AverageTransactionAggregate(
     timeKey: String,
-    totalAmount: Double,
+    totalAmount: Long,
     count: Long
+    
   ) {
-  def averageAmount: Double = totalAmount / count
+  def averageAmount: Long = totalAmount / count
 }
 
 object AverageTransactionAggregate {
   val formatTimeKey = new SimpleDateFormat("yyyy-mm")
   val formatDate = new SimpleDateFormat("mm/dd/yyyy")
   def apply(raw: MLSTransaction): AverageTransactionAggregate =
-    AverageTransactionAggregate("01/01/1900", 0.0, 1L)
+    AverageTransactionAggregate(formatTimeKey.format(formatDate.parse(raw.soldDate)) +"-"+ raw.proptype , raw.soldPrice.getOrElse(0L), 1L)
 
   implicit val averageTransactionMonoid: Monoid[AverageTransactionAggregate] =
     new Monoid[AverageTransactionAggregate] {
       override def empty: AverageTransactionAggregate =
-        AverageTransactionAggregate("", 0.0, 0L)
+        AverageTransactionAggregate("", 0L, 0L)
 
       override def combine(
           x: AverageTransactionAggregate,
