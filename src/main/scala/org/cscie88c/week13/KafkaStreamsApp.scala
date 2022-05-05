@@ -12,6 +12,9 @@ import com.goyeau.kafka.streams.circe.CirceSerdes._
 import io.circe.generic.auto._
 import cats.implicits._
 
+
+
+// define data struct for kafka stream configuration 
 case class KafkaStreamsAppConfig(
   name: String,
   inputTopicName: String,
@@ -19,26 +22,26 @@ case class KafkaStreamsAppConfig(
   bootstrapServerUrl: String
 )
 
-
-
 // run with: sbt "runMain org.cscie88c.week13.KafkaStreamsApp"
-object KafkaStreamsApp extends LazyLogging{
-
+object KafkaStreamsApp extends LazyLogging {
+  //filter invalid formated data
   def SomeTransaction(tuple: (String,Option[MLSTransaction])): (String, MLSTransaction) = {
     tuple match {
       case (first, Some(second)) => (first, second)
     }
   }
-
+  //transform data type 
   def AggregateTransaction(tuple: (String, MLSTransaction)): (String,AverageTransactionAggregate) = {
     val aggregateVal = AverageTransactionAggregate(tuple._2)
     (aggregateVal.timeKey,aggregateVal)
   }
 
   def main(args: Array[String]): Unit = {
+    //import necessary implicit
     import ImplicitConversions._
     import Serdes._
     
+    //load configuration from configuration file
     val appSettings = ConfigUtils.loadAppConfig[KafkaStreamsAppConfig]("org.cscie88c.simple-kafkastreams-app")
     
     // 1. define kafka streams properties, usually from a config file
@@ -60,35 +63,17 @@ object KafkaStreamsApp extends LazyLogging{
        .map((k,v) => (k, MLSTransaction(v)))
        .filter((_,v) => v.isDefined)
        .map((k,v) => SomeTransaction(k,v))
-       .filter((_,v) => v.status.trim == "SLD" && v.soldDate.length > 0)
+       .filter((_,v) => v.status.trim == "SLD" && v.soldDate.length > 0 && v.proptype.length == 2)
     // b. transform and aggregate monthly data for each property type
-      val monthlyAggregateKTable: KTable[String,AverageTransactionAggregate] = filteredMLSKStream
+      val monthlyAverageAggregateKTable: KTable[String,AverageTransactionAggregate] = filteredMLSKStream
        .map((k,v) => AggregateTransaction(k,v))
        .groupBy((k,_) => k)
-       .reduce (_ |+| _)(Materialized.as("mls-counts-store") )
-      
+       .reduce (_ |+| _)
+
     // 4. sink aggregated data to output topic
-      monthlyAggregateKTable
+      monthlyAverageAggregateKTable
       .toStream
       .to(appSettings.outputTopicName)
-
-    // val monthlyAverageKTable: KTable[String,Double] = monthlyAverageKStream
-    //   .groupBy((k,v) => k)
-    //   .reduce((a,b) => a + b )(Materialized.as("counts-store"))
-
-
-    // val wordCounts: KTable[String, Long] = textLines
-    //   .flatMapValues(textLine => textLine.toLowerCase.split("\\W+"))
-    //   .groupBy((_, word) => word)
-    //   .count()(Materialized.as("counts-store"))
-
-    // 4. write the results to a topic or other persistent store
-    // wordCounts
-    //   .toStream
-    //   // .peek((k,t) => println(s"stream element: $k: $t")) // to print items in stream
-    //   .filter((_, count) => count > 5)
-    //   .map((word, count) => (word, s"$word: $count"))
-    //   .to("WordsWithCountsTopic")
 
     // 5. start the streams application
     val streams: KafkaStreams = new KafkaStreams(builder.build(), props)

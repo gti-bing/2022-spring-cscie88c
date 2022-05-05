@@ -16,6 +16,10 @@ lazy val root = (project in file(".")).
       "-language:higherKinds", // HKT required for Monads and other HKT types
       "-Wunused", // for scalafix
     ),
+      //logging level
+    logLevel := Level.Error,
+    resolvers += "MVN Repo" at "https://packages.confluent.io/maven",
+
     libraryDependencies ++= Dependencies.core ++ Dependencies.scalaTest,
     // assembly / mainClass := Some("org.cscie88c.MainApp"),
     // assembly / assemblyJarName := "2022SpringScalaIntro.jar",
@@ -34,6 +38,8 @@ lazy val root = (project in file(".")).
       ShadeRule.rename("shapeless.**" -> "shadeshapeless.@1").inAll
     )
   )
+
+
 
 // Custom task to zip files for homework submission
 lazy val zipHomework = taskKey[Unit]("zip files for homework submission")
