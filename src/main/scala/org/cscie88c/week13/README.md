@@ -1,5 +1,5 @@
-##Command to create Spooldir connector (Source)
-
+## Command to create Spooldir connector (Source)
+```
 curl -i -X PUT -H "Accept:application/json" \
 	-H "Content-Type:application/json" http://localhost:8083/connectors/source-csv-spooldir-00/config \
 	-d '{
@@ -11,9 +11,9 @@ curl -i -X PUT -H "Accept:application/json" \
 		"input.file.pattern": ".*\\.csv",
 		"topic": "mls_source_topic_spooldir_00"
 	}'
-
-##Command to create JDBC connector (Sink)
-
+```
+## Command to create JDBC connector (Sink)
+```
 curl -i -X PUT -H "Accept:application/json" \
 	-H "Content-Type:application/json" http://localhost:8083/connectors/sink-postgresql-jdbc-00/config \
 	-d '{
@@ -31,3 +31,20 @@ curl -i -X PUT -H "Accept:application/json" \
 		"pk.mode": "record_value",
 		"pk.fields": "TIMEKEY"
 	}'
+```
+
+## Command to connect to the ksqldb server
+```
+docker exec -it ksqldb ksql http://ksqldb:8088
+```
+## ksqldb statements to create new topic with Avro format
+```
+CREATE STREAM MLS_SINK_TOPIC_JDBC_00_JSON (timeKey VARCHAR, totalAmount BIGINT, count INT)
+  WITH (KAFKA_TOPIC='mls_sink_topic_jdbc_00', VALUE_FORMAT='JSON');
+
+SET 'auto.offset.reset' = 'earliest';
+
+CREATE STREAM MLS_SINK_TOPIC_JDBC_00_AVRO
+  WITH (VALUE_FORMAT='AVRO') AS
+    SELECT * FROM MLS_SINK_TOPIC_JDBC_00_JSON;    
+```    
