@@ -18,17 +18,20 @@ lazy val root = (project in file(".")).
     ),
       //logging level
     logLevel := Level.Error,
-    resolvers += "MVN Repo" at "https://packages.confluent.io/maven",
+    // resolvers += "MVN Repo" at "https://packages.confluent.io/maven",
 
     libraryDependencies ++= Dependencies.core ++ Dependencies.scalaTest,
     // assembly / mainClass := Some("org.cscie88c.MainApp"),
     // assembly / assemblyJarName := "2022SpringScalaIntro.jar",
-    assembly / mainClass := Some("org.cscie88c.week11.SparkAverageTransactionAggregateJob"),
-    assembly / assemblyJarName := "2022SpringSparkJob.jar",
+    // assembly / mainClass := Some("org.cscie88c.week11.SparkAverageTransactionAggregateJob"),
+    // assembly / assemblyJarName := "2022SpringSparkJob.jar",
+    assembly / mainClass := Some("org.cscie88c.week13.KafkaStreamsApp"),
+    assembly / assemblyJarName := "KafkaStreamsApp.jar",
     assembly / test := {},
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", xs @ _*) => MergeStrategy.discard
       case "application.conf"            => MergeStrategy.concat
+      case PathList(ps @ _*) if ps.last == "module-info.class" || ps.last == "module-info 2.class" => MergeStrategy.discard
       case x =>
         val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)

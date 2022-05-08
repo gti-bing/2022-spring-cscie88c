@@ -24,17 +24,7 @@ case class KafkaStreamsAppConfig(
 
 // run with: sbt "runMain org.cscie88c.week13.KafkaStreamsApp"
 object KafkaStreamsApp extends LazyLogging {
-  //filter invalid formated data
-  def SomeTransaction(tuple: (String,Option[MLSTransaction])): (String, MLSTransaction) = {
-    tuple match {
-      case (first, Some(second)) => (first, second)
-    }
-  }
-  //transform data type 
-  def AggregateTransaction(tuple: (String, MLSTransaction)): (String,AverageTransactionAggregate) = {
-    val aggregateVal = AverageTransactionAggregate(tuple._2)
-    (aggregateVal.timeKey,aggregateVal)
-  }
+
 
   def main(args: Array[String]): Unit = {
     //import necessary implicit
@@ -83,6 +73,18 @@ object KafkaStreamsApp extends LazyLogging {
     sys.ShutdownHookThread {
       streams.close(Duration.ofSeconds(10))
     }
+  }
+
+    //filter invalid formated data
+  def SomeTransaction(tuple: (String,Option[MLSTransaction])): (String, MLSTransaction) = {
+    tuple match {
+      case (first, Some(second)) => (first, second)
+    }
+  }
+  //transform data type 
+  def AggregateTransaction(tuple: (String, MLSTransaction)): (String,AverageTransactionAggregate) = {
+    val aggregateVal = AverageTransactionAggregate(tuple._2)
+    (aggregateVal.timeKey,aggregateVal)
   }
 
 }

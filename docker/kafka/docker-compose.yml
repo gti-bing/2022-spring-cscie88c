@@ -6,30 +6,81 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.0
     hostname: zookeeper
-    container_name: kafkastreams-zookeeper-container
+    container_name: kafkastreams-zookeeper1-container
     ports:
       - "2181:2181"
     environment:
+      ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   broker1:
     image: confluentinc/cp-kafka:6.2.0
-    hostname: broker
+    hostname: broker1
     container_name: kafkastreams-broker1-container
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - "19092:19092"
     expose:
-      - "9093"
+      - "19093"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9093,OUTSIDE://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:19093,OUTSIDE://localhost:19092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093,OUTSIDE://0.0.0.0:19092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 
+    volumes:
+       - ./data:/opt/kafka-data
+
+  broker2:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: broker2
+    container_name: kafkastreams-broker2-container
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    expose:
+      - "29093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:29093,OUTSIDE://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29093,OUTSIDE://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+       - ./data:/opt/kafka-data
+
+  broker3:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: broker3
+    container_name: kafkastreams-broker3-container
+    depends_on:
+      - zookeeper
+    ports:
+      - "39092:39092"
+    expose:
+      - "39093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:39093,OUTSIDE://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:39093,OUTSIDE://0.0.0.0:39092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
@@ -46,6 +97,8 @@ services:
     depends_on:
       - zookeeper
       - broker1
+      - broker2
+      - broker3
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
@@ -56,12 +109,14 @@ services:
     container_name: ksqldb
     depends_on:
       - broker1
+      - broker2
+      - broker3
       - kafka-connect
     ports:
       - "8088:8088"
     environment:
       KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_BOOTSTRAP_SERVERS: broker:9093
+      KSQL_BOOTSTRAP_SERVERS: broker1:19093,broker2:29093,broker3:39093
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_KSQL_CONNECT_URL: http://kafka-connect:8083
@@ -75,11 +130,13 @@ services:
     depends_on:
       - zookeeper
       - broker1
+      - broker2
+      - broker3
       - schema-registry
     ports:
       - 8083:8083
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: "broker:9093"
+      CONNECT_BOOTSTRAP_SERVERS: broker1:19093,broker2:29093,broker3:39093 
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-config
@@ -110,6 +167,37 @@ services:
     volumes:
        - ./data:/opt/kafka-data
 
+  app1:
+    image: kafkastreamsapp
+    hostname: app1
+    container_name: kafkastreams-app1-container
+    ports:
+      - 18080:18080
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+    command: "/bin/bash -c 'echo Waiting for Kafka to be ready... && \
+                            sleep 120 && \
+                            java -jar KafkaStreamsApp.jar && \
+                            sleep infinity'"
+
+  app2:
+    image: kafkastreamsapp
+    hostname: app2
+    container_name: kafkastreams-app2-container
+    ports:
+      - 18081:18081
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+    command: "/bin/bash -c 'echo Waiting for Kafka to be ready... && \
+                            sleep 120 && \
+                            java -jar KafkaStreamsApp.jar && \
+                            sleep infinity'"
+
+
   # This "container" is a workaround to pre-create topics
   kafka-setup:
     image: confluentinc/cp-kafka:6.2.0
@@ -117,6 +205,8 @@ services:
     container_name: kafkastreams-kafka-setup
     depends_on:
       - broker1
+      - broker2
+      - broker3
     command: "/bin/bash -c 'echo Waiting for Kafka to be ready... && \
                             sleep 60 && \
                             kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic mls_source_topic_spooldir_00 && \
